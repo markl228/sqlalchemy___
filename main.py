@@ -1,7 +1,7 @@
 import datetime
 from os import abort
 
-from flask import Flask, render_template, redirect, request, make_response
+from flask import Flask, render_template, redirect, request, make_response, jsonify
 from data import db_session
 from data.users import User
 from data.news import News
@@ -9,6 +9,7 @@ from forms.news import NewsForm
 from forms.out import LoginForm
 from forms.user import RegisterForm
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
+import news_api
 
 app = Flask(__name__)
 
@@ -152,6 +153,10 @@ def edit_news(id):
                            form=form
                            )
 
+@app.errorhandler(404)
+def not_found(error):
+    return make_response(jsonify({'error': 'Not found'}), 404)
+
 
 @app.route('/news_delete/<int:id>', methods=['GET', 'POST'])
 @login_required
@@ -170,6 +175,7 @@ def news_delete(id):
 
 def main():
     db_session.global_init('db/blogs.db')
+    app.register_blueprint(news_api.blueprint)
     app.run()
 
 
